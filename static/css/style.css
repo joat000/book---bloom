@@ -1056,19 +1056,8 @@ body {
 
 /* Responsive Design - Mobile First */
 
-/* Tablet adjustments (768px - 1024px) */
-@media (max-width: 1024px) and (min-width: 769px) {
-    .logo {
-        font-size: 4rem;
-    }
-
-    .businesses-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* Mobile phones only (max-width: 768px) */
-@media (max-width: 768px) {
+/* Mobile phones and tablets (max-width: 1024px) */
+@media (max-width: 1024px) {
     body {
         overflow-x: hidden;
     }
