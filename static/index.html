@@ -213,8 +213,16 @@
                         <input type="file" id="profile-photo-input" accept="image/*" onchange="uploadPhoto()"
                             style="display: none;">
                     </div>
-                    <div class="profile-name" id="profile-name">User Name</div>
-                    <div class="profile-email" id="profile-email">user@email.com</div>
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">User Name</div>
+                        <div class="profile-email" id="profile-email">user@email.com</div>
+                    </div>
+                    <!-- Hamburger menu for mobile -->
+                    <button class="hamburger-menu" onclick="toggleMobileMenu()" aria-label="Menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
                 </div>
 
                 <div class="sidebar-nav">
@@ -242,6 +250,37 @@
                     <button class="delete-account-btn" onclick="deleteAccount()">⚠️ Delete Account</button>
                 </div>
             </div>
+
+            <!-- Mobile Settings Panel -->
+            <div class="mobile-settings-panel" id="mobile-settings-panel">
+                <div class="mobile-settings-header">
+                    <h3>Settings</h3>
+                    <button class="close-settings" onclick="toggleMobileMenu()">✕</button>
+                </div>
+                <div class="mobile-settings-content">
+                    <div class="settings-section">
+                        <h4>Profile Photo</h4>
+                        <button class="settings-btn"
+                            onclick="document.getElementById('profile-photo-input').click(); toggleMobileMenu();">
+                            📷 Change Photo
+                        </button>
+                        <button class="settings-btn" id="mobile-remove-photo"
+                            onclick="removePhoto(); toggleMobileMenu();">
+                            🗑️ Remove Photo
+                        </button>
+                    </div>
+                    <div class="settings-section">
+                        <h4>Account</h4>
+                        <button class="settings-btn logout" onclick="logout()">
+                            🚪 Logout
+                        </button>
+                        <button class="settings-btn delete" onclick="deleteAccount()">
+                            ⚠️ Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mobile-settings-overlay" id="mobile-settings-overlay" onclick="toggleMobileMenu()"></div>
 
             <div class="profile-content">
                 <!-- Discover Section -->
