@@ -99,6 +99,24 @@ function switchSection(sectionName) {
     }
 }
 
+// Toggle mobile settings menu
+function toggleMobileMenu() {
+    const panel = document.getElementById('mobile-settings-panel');
+    const overlay = document.getElementById('mobile-settings-overlay');
+
+    panel.classList.toggle('active');
+    overlay.classList.toggle('active');
+
+    // Update remove photo button visibility in mobile menu
+    const mobileRemoveBtn = document.getElementById('mobile-remove-photo');
+    if (currentUser && currentUser.profile_photo) {
+        mobileRemoveBtn.style.display = 'flex';
+    } else {
+        mobileRemoveBtn.style.display = 'none';
+    }
+}
+
+
 // ============ FILE PREVIEW ============
 function previewUserPhoto(input) {
     const preview = document.getElementById('user-photo-preview');
