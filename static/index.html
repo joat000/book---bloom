@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOOK&BLOOM - Find Your Perfect Beauty Experience</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+
+<body>
+    <div class="stars-background"></div>
+
+    <!-- LANDING PAGE -->
+    <div id="landing-page" class="app-page active">
+        <div class="landing-container">
+            <div class="logo-container">
+                <div class="logo">BOOK&BLOOM</div>
+                <p class="tagline">✨ Discover Beauty, Book Bliss ✨</p>
+            </div>
+
+            <div class="auth-options">
+                <div class="auth-card" onclick="goToUserAuth()">
+                    <div class="auth-card-icon">👤</div>
+                    <h2>User Sign In</h2>
+                    <p>Find and book amazing beauty services near you</p>
+                </div>
+
+                <div class="auth-card" onclick="goToBusinessAuth()">
+                    <div class="auth-card-icon">💼</div>
+                    <h2>Business Portal</h2>
+                    <p>Register your salon or beauty business</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER AUTH PAGE -->
+    <div id="user-auth-page" class="app-page">
+        <div class="auth-page-container">
+            <div class="container">
+                <button class="back-button" onclick="goToLanding()">← Back to Home</button>
+
+                <div class="auth-box">
+                    <h1 class="auth-title">User Portal</h1>
+
+                    <div class="auth-tabs">
+                        <button class="tab-btn active" onclick="switchUserTab('login')">Sign In</button>
+                        <button class="tab-btn" onclick="switchUserTab('register')">Register</button>
+                    </div>
+
+                    <!-- Login Tab -->
+                    <div id="user-login-tab" class="tab-content active">
+                        <form onsubmit="handleUserLogin(event)">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="user-login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="user-login-password" required>
+                            </div>
+                            <button type="submit" class="btn" id="user-login-btn">Sign In ✨</button>
+                        </form>
+                    </div>
+
+                    <!-- Register Tab -->
+                    <div id="user-register-tab" class="tab-content">
+                        <form onsubmit="handleUserRegister(event)">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="user-reg-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="user-reg-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="user-reg-password" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label>Profile Photo (Optional)</label>
+                                <div class="file-upload-area"
+                                    onclick="document.getElementById('user-photo-input').click()">
+                                    <input type="file" id="user-photo-input" accept="image/*"
+                                        onchange="previewUserPhoto(this)">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Click to upload profile photo</div>
+                                </div>
+                                <div id="user-photo-preview" class="file-preview"></div>
+                            </div>
+                            <button type="submit" class="btn" id="user-reg-btn">Create Account ✨</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BUSINESS AUTH PAGE -->
+    <div id="business-auth-page" class="app-page">
+        <div class="auth-page-container">
+            <div class="container">
+                <button class="back-button" onclick="goToLanding()">← Back to Home</button>
+
+                <div class="auth-box" style="max-width: 600px;">
+                    <h1 class="auth-title">Business Portal</h1>
+
+                    <div class="auth-tabs">
+                        <button class="tab-btn active" onclick="switchBusinessTab('login')">Sign In</button>
+                        <button class="tab-btn" onclick="switchBusinessTab('register')">Register Business</button>
+                    </div>
+
+                    <!-- Login Tab -->
+                    <div id="business-login-tab" class="tab-content active">
+                        <form onsubmit="handleBusinessLogin(event)">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="business-login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="business-login-password" required>
+                            </div>
+                            <button type="submit" class="btn" id="business-login-btn">Sign In 💼</button>
+                        </form>
+                    </div>
+
+                    <!-- Register Tab -->
+                    <div id="business-register-tab" class="tab-content">
+                        <form onsubmit="handleBusinessRegister(event)">
+                            <div class="form-group">
+                                <label>Business Name *</label>
+                                <input type="text" id="biz-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Owner Name *</label>
+                                <input type="text" id="biz-owner" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" id="biz-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone *</label>
+                                <input type="tel" id="biz-phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Business Type *</label>
+                                <select id="biz-type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Salon">Salon</option>
+                                    <option value="Spa">Spa</option>
+                                    <option value="Nails">Nails</option>
+                                    <option value="Makeup">Makeup</option>
+                                    <option value="Skin Care">Skin Care</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Address *</label>
+                                <textarea id="biz-address" rows="2" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Latitude *</label>
+                                <input type="number" id="biz-lat" step="any" required placeholder="40.7128">
+                            </div>
+                            <div class="form-group">
+                                <label>Longitude *</label>
+                                <input type="number" id="biz-lon" step="any" required placeholder="-74.0060">
+                            </div>
+                            <div class="form-group">
+                                <label>Website (Optional)</label>
+                                <input type="url" id="biz-website">
+                            </div>
+                            <div class="form-group">
+                                <label>Verification Document (Optional)</label>
+                                <div class="file-upload-area"
+                                    onclick="document.getElementById('biz-doc-input').click()">
+                                    <input type="file" id="biz-doc-input" accept=".pdf,.doc,.docx,image/*"
+                                        onchange="previewBizDoc(this)">
+                                    <div class="upload-icon">📄</div>
+                                    <div class="upload-text">Upload business license or verification</div>
+                                </div>
+                                <div id="biz-doc-preview" class="file-preview"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Password *</label>
+                                <input type="password" id="biz-password" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn" id="business-reg-btn">Register Business 🌸</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="profile-page" class="app-page">
+        <div class="profile-container">
+            <div class="profile-sidebar">
+                <div class="profile-header">
+                    <div class="profile-photo-container">
+                        <div class="profile-photo" id="profile-photo">👤</div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="photo-btn" onclick="document.getElementById('profile-photo-input').click()">📷
+                            Change Photo</button>
+                        <button class="photo-btn remove" id="profile-photo-remove" onclick="removePhoto()">🗑️
+                            Remove</button>
+                        <input type="file" id="profile-photo-input" accept="image/*" onchange="uploadPhoto()"
+                            style="display: none;">
+                    </div>
+                    <div class="profile-name" id="profile-name">User Name</div>
+                    <div class="profile-email" id="profile-email">user@email.com</div>
+                </div>
+
+                <div class="sidebar-nav">
+                    <div class="menu-item active" onclick="switchSection('discover')">
+                        <span class="menu-icon">🔍</span>
+                        <span>Discover</span>
+                    </div>
+
+                    <div class="menu-item" onclick="switchSection('notifications')">
+                        <span class="menu-icon notification-badge">
+                            🔔
+                            <span class="notification-count" id="notification-count">0</span>
+                        </span>
+                        <span>Notifications</span>
+                    </div>
+
+                    <div class="menu-item" onclick="switchSection('favorites')">
+                        <span class="menu-icon">❤️</span>
+                        <span>Favorites</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-footer">
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                    <button class="delete-account-btn" onclick="deleteAccount()">⚠️ Delete Account</button>
+                </div>
+            </div>
+
+            <div class="profile-content">
+                <!-- Discover Section -->
+                <div id="discover-section" class="content-section active">
+                    <h2 style="margin-bottom: 20px;">Discover Beauty Near You 🌸</h2>
+
+                    <div class="location-controls">
+                        <div class="search-container">
+                            <input type="text" id="search-input" class="search-input"
+                                placeholder="Search businesses or cities...">
+                            <button class="search-btn" onclick="performSearch()">🔍</button>
+                        </div>
+                        <button class="location-btn" onclick="enableLocation()">📍 Enable Location</button>
+                        <div class="location-status" id="location-status">Location Enabled ✓</div>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="filterBusinesses('All')">All</button>
+                        <button class="filter-btn" onclick="filterBusinesses('Salon')">💇 Salon</button>
+                        <button class="filter-btn" onclick="filterBusinesses('Spa')">🧘 Spa</button>
+                        <button class="filter-btn" onclick="filterBusinesses('Nails')">💅 Nails</button>
+                        <button class="filter-btn" onclick="filterBusinesses('Makeup')">💄 Makeup</button>
+                        <button class="filter-btn" onclick="filterBusinesses('Skin Care')">✨ Skin Care</button>
+                    </div>
+
+                    <div id="map"></div>
+
+                    <h3 style="margin: 30px 0 20px 0;">Nearby Businesses</h3>
+                    <div id="businesses-grid" class="businesses-grid"></div>
+                </div>
+
+                <!-- Notifications Section -->
+                <div id="notifications-section" class="content-section">
+                    <h2 style="margin-bottom: 20px;">Notifications 🔔</h2>
+                    <div id="notifications-list" class="notification-panel">
+                        <p style="color: #b8a9d6; text-align: center; padding: 40px;">No notifications yet</p>
+                    </div>
+                </div>
+
+                <!-- Favorites Section -->
+                <div id="favorites-section" class="content-section">
+                    <h2 style="margin-bottom: 20px;">My Favorites ❤️</h2>
+                    <div id="favorites-grid" class="businesses-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div id="photo-modal" class="photo-modal" onclick="closePhotoModal()">
+        <span class="photo-modal-close">&times;</span>
+        <img id="photo-modal-img" class="photo-modal-content">
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+
+</html>
