@@ -27,7 +27,14 @@ function goToProfile() {
     showPage('profile-page');
     setTimeout(() => {
         initMap();
-        loadBusinesses();
+
+        // Auto-request location if not already set
+        if (userLocation.lat === null || userLocation.lon === null) {
+            enableLocation(true); // true = autoRetry, won't show "Requesting..." toast
+        } else {
+            loadBusinesses();
+        }
+
         loadNotifications();
         loadFavorites();
         checkUnreadNotifications();
@@ -442,20 +449,34 @@ function closePhotoModal() {
 }
 
 // ============ LOCATION ============
-function enableLocation() {
+function enableLocation(autoRetry = false) {
+    console.log('🌍 [LOCATION] enableLocation() called, autoRetry:', autoRetry);
+
     if (!navigator.geolocation) {
+        console.error('❌ [LOCATION] Geolocation API not supported');
         showToast('Geolocation not supported by your browser', 'error');
+        getLocationFromIP(); // Try IP-based fallback
         return;
     }
 
-    showToast('Requesting location access...', 'success');
+    if (!autoRetry) {
+        showToast('Requesting location access...', 'success');
+    }
+
+    console.log('📍 [LOCATION] Requesting browser geolocation...');
 
     navigator.geolocation.getCurrentPosition(
         (position) => {
+            console.log('✅ [LOCATION] Browser geolocation SUCCESS:', {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy
+            });
+
             userLocation.lat = position.coords.latitude;
             userLocation.lon = position.coords.longitude;
 
-            showToast('Location found! ✓', 'success');
+            showToast(`Location found! ✓ (${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)})`, 'success');
             document.getElementById('location-status').classList.add('active');
 
             if (map) {
@@ -478,41 +499,113 @@ function enableLocation() {
             }
         },
         (error) => {
-            console.error('Location error:', error);
-            let errorMessage = 'Location access denied. ';
+            console.error('❌ [LOCATION] Browser geolocation FAILED:', {
+                code: error.code,
+                message: error.message,
+                PERMISSION_DENIED: error.PERMISSION_DENIED,
+                POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
+                TIMEOUT: error.TIMEOUT
+            });
+
+            let errorMessage = '';
+            let detailedHelp = '';
 
             // Provide specific error messages
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    errorMessage += 'Please enable location permissions in your browser settings.';
+                    errorMessage = '🚫 Location access denied';
+                    detailedHelp = 'Please enable location permissions in your browser settings. On mobile, check your device location settings too.';
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    errorMessage += 'Location information unavailable.';
+                    errorMessage = '📡 Location unavailable';
+                    detailedHelp = 'Your device cannot determine your location. Make sure GPS/location services are enabled.';
                     break;
                 case error.TIMEOUT:
-                    errorMessage += 'Location request timed out.';
+                    errorMessage = '⏱️ Location request timed out';
+                    detailedHelp = 'Location detection is taking too long. Check your internet connection and try again.';
                     break;
                 default:
-                    errorMessage += 'Unknown error occurred.';
+                    errorMessage = '❌ Location error';
+                    detailedHelp = 'An unknown error occurred while detecting your location.';
             }
 
-            showToast(errorMessage + ' Showing businesses in Toronto.', 'warning');
+            console.log(`📋 [LOCATION] Error details: ${errorMessage} - ${detailedHelp}`);
+            showToast(`${errorMessage}. Trying IP-based location...`, 'warning');
 
-            // Default to Toronto if location fails
-            if (map) {
-                map.setView([43.6532, -79.3832], 12);
-                // Load businesses for default location
-                userLocation.lat = 43.6532;
-                userLocation.lon = -79.3832;
-                loadBusinesses();
-            }
+            // Try IP-based geolocation as fallback
+            getLocationFromIP();
         },
         {
             enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0
+            timeout: 30000, // 30 seconds for slower connections
+            maximumAge: 300000 // Cache location for 5 minutes
         }
     );
+}
+
+// Get location from IP address (fallback method)
+async function getLocationFromIP() {
+    console.log('🌐 [IP-LOCATION] Attempting IP-based geolocation...');
+
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+
+        console.log('✅ [IP-LOCATION] IP geolocation SUCCESS:', data);
+
+        if (data.latitude && data.longitude) {
+            userLocation.lat = data.latitude;
+            userLocation.lon = data.longitude;
+
+            const locationName = data.city || data.region || data.country_name || 'Unknown';
+
+            showToast(`📍 Location detected: ${locationName}, ${data.country_name}`, 'success');
+
+            if (map) {
+                map.setView([userLocation.lat, userLocation.lon], 12);
+
+                if (userMarker) map.removeLayer(userMarker);
+
+                userMarker = L.marker([userLocation.lat, userLocation.lon], {
+                    icon: L.icon({
+                        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    })
+                }).addTo(map).bindPopup(`📍 ${locationName} (IP-based)`).openPopup();
+
+                loadBusinesses();
+            }
+
+            const statusEl = document.getElementById('location-status');
+            if (statusEl) {
+                statusEl.textContent = `📍 ${locationName} (IP-based)`;
+                statusEl.style.display = 'block';
+            }
+        } else {
+            throw new Error('No coordinates in IP response');
+        }
+    } catch (error) {
+        console.error('❌ [IP-LOCATION] IP geolocation FAILED:', error);
+        showToast('Could not detect location. Using default (Toronto).', 'warning');
+        setDefaultLocation();
+    }
+}
+
+// Set default location (Toronto) when geolocation fails
+function setDefaultLocation() {
+    userLocation.lat = 43.6532;
+    userLocation.lon = -79.3832;
+
+    if (map) {
+        map.setView([userLocation.lat, userLocation.lon], 12);
+        loadBusinesses();
+    }
+
+    document.getElementById('location-status')?.classList.remove('active');
 }
 
 // ============ MAP ============
